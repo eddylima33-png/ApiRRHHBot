@@ -1,0 +1,6 @@
+@ApiRRHH_HostAddress = http://localhost:5034
+
+GET {{ApiRRHH_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
