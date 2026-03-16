@@ -11,6 +11,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<PayrollService>();
 builder.Services.AddScoped<WhatsappService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<PayrollServicePage>();
 
 var app = builder.Build();
 
