@@ -16,6 +16,18 @@ builder.Services.AddScoped<PayrollServicePage>();
 var app = builder.Build();
 
 // Pipeline HTTP
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("PermitirWeb", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+app.UseCors("PermitirWeb");
 app.UseSwagger();
 app.UseSwaggerUI();
 
