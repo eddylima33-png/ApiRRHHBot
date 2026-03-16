@@ -151,7 +151,21 @@
   <script>
     const API_BASE = "https://apirrhhbot.onrender.com";
     const btnConsultar = document.getElementById("btnConsultar");
+    <div style="margin-top:10px;">
+<label>
+<input type="checkbox" id="aceptoConsulta">
+Confirmo que estoy de acuerdo con consultar los datos de mi última planilla pagada.
+Entiendo que esta consulta quedará registrada en el sistema como constancia digital
+de recepción de mi pago, equivalente a un recibo de pago electrónico.
+</label>
+</div>
+    function consultarPlanilla(){
 
+    const check = document.getElementById("aceptoConsulta");
+
+    if(!check.checked){
+        alert("Debe confirmar que está de acuerdo con consultar su planilla.");
+        return;
     btnConsultar.addEventListener("click", consultarPlanilla);
 
     async function consultarPlanilla() {
@@ -239,6 +253,10 @@
       document.getElementById("error").style.display = "none";
       document.getElementById("resultado").style.display = "none";
     }
+    <footer style="margin-top:30px; text-align:center; font-size:12px; color:#555;">
+© 2026 Sistema de Consulta de Planillas  
+Propiedad Intelectual M.A. Lic. Brandon Lima
+</footer>
   </script>
 </body>
 </html>
