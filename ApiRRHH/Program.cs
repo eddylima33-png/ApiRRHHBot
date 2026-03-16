@@ -13,10 +13,6 @@ builder.Services.AddScoped<WhatsappService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PayrollServicePage>();
 
-var app = builder.Build();
-
-// Pipeline HTTP
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("PermitirWeb", policy =>
@@ -27,6 +23,9 @@ builder.Services.AddCors(options =>
     });
 });
 
+var app = builder.Build();
+
+// Pipeline HTTP
 app.UseCors("PermitirWeb");
 app.UseSwagger();
 app.UseSwaggerUI();
