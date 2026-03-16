@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <div style="text-align:center;margin-bottom:20px;">
-<img src="ApiRRHH/Images/LogoNova.png" alt="Logo empresa" style="height:70px;">
-</div>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Consulta de Última Planilla</title>
   <style>
     * { box-sizing: border-box; }
+
     body {
       font-family: Arial, sans-serif;
       background: #f3f5f7;
@@ -16,6 +14,7 @@
       padding: 40px 20px;
       color: #1f2937;
     }
+
     .contenedor {
       max-width: 640px;
       margin: 0 auto;
@@ -24,28 +23,70 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.08);
       padding: 28px;
     }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .logo img {
+      height: 80px;
+      max-width: 100%;
+    }
+
     h1 {
       margin-top: 0;
       margin-bottom: 10px;
       font-size: 28px;
+      text-align: center;
     }
+
     p {
       margin-top: 0;
       color: #4b5563;
+      text-align: center;
     }
+
     label {
       display: block;
       font-weight: bold;
       margin-bottom: 8px;
       margin-top: 18px;
     }
-    input {
+
+    input[type="text"] {
       width: 100%;
       padding: 12px;
       border: 1px solid #d1d5db;
       border-radius: 8px;
       font-size: 16px;
     }
+
+    .check-contenedor {
+      margin-top: 16px;
+      padding: 12px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #374151;
+      line-height: 1.5;
+    }
+
+    .check-contenedor label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 0;
+      font-weight: normal;
+    }
+
+    .check-contenedor input[type="checkbox"] {
+      margin-top: 3px;
+      width: auto;
+      flex-shrink: 0;
+    }
+
     button {
       margin-top: 18px;
       width: 100%;
@@ -57,9 +98,11 @@
       font-size: 16px;
       cursor: pointer;
     }
+
     button:hover {
       background: #0b5ed7;
     }
+
     .mensaje,
     .error,
     .resultado {
@@ -68,18 +111,22 @@
       padding: 16px;
       display: none;
     }
+
     .mensaje {
       background: #eef6ff;
       color: #1d4ed8;
     }
+
     .error {
       background: #fef2f2;
       color: #b91c1c;
     }
+
     .resultado {
       background: #f9fafb;
       border: 1px solid #e5e7eb;
     }
+
     .fila {
       display: flex;
       justify-content: space-between;
@@ -87,25 +134,51 @@
       padding: 8px 0;
       border-bottom: 1px solid #e5e7eb;
     }
+
     .fila:last-child {
       border-bottom: none;
     }
+
     .titulo {
       font-weight: bold;
       color: #374151;
     }
+
     .valor {
       text-align: right;
+    }
+
+    footer {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 12px;
+      color: #555;
+      line-height: 1.5;
     }
   </style>
 </head>
 <body>
   <div class="contenedor">
+    <div class="logo">
+      <img src="images/LogoNova.png" alt="Logo empresa">
+    </div>
+
     <h1>Consulta de Última Planilla</h1>
     <p>Ingrese su DPI para consultar la última planilla registrada.</p>
 
     <label for="dpi">DPI</label>
     <input type="text" id="dpi" placeholder="Ejemplo: 1000000000003" />
+
+    <div class="check-contenedor">
+      <label for="aceptoConsulta">
+        <input type="checkbox" id="aceptoConsulta" />
+        <span>
+          Confirmo que estoy de acuerdo con consultar los datos de mi última planilla pagada.
+          Entiendo que esta consulta quedará registrada en el sistema como constancia digital
+          de recepción de mi pago, equivalente a un recibo de pago electrónico.
+        </span>
+      </label>
+    </div>
 
     <button id="btnConsultar">Consultar planilla</button>
 
@@ -148,33 +221,30 @@
     </div>
   </div>
 
+  <footer>
+    © 2026 Sistema de Consulta de Planillas<br>
+    Propiedad Intelectual M.A. Lic. Brandon Lima
+  </footer>
+
   <script>
     const API_BASE = "https://apirrhhbot.onrender.com";
     const btnConsultar = document.getElementById("btnConsultar");
-    <div style="margin-top:10px;">
-<label>
-<input type="checkbox" id="aceptoConsulta">
-Confirmo que estoy de acuerdo con consultar los datos de mi última planilla pagada.
-Entiendo que esta consulta quedará registrada en el sistema como constancia digital
-de recepción de mi pago, equivalente a un recibo de pago electrónico.
-</label>
-</div>
-    function consultarPlanilla(){
 
-    const check = document.getElementById("aceptoConsulta");
-
-    if(!check.checked){
-        alert("Debe confirmar que está de acuerdo con consultar su planilla.");
-        return;
     btnConsultar.addEventListener("click", consultarPlanilla);
 
     async function consultarPlanilla() {
       const dpi = document.getElementById("dpi").value.trim();
+      const check = document.getElementById("aceptoConsulta");
 
       ocultarTodo();
 
       if (!dpi) {
         mostrarError("Debe ingresar un DPI.");
+        return;
+      }
+
+      if (!check.checked) {
+        mostrarError("Debe confirmar que está de acuerdo con consultar su planilla.");
         return;
       }
 
@@ -253,10 +323,6 @@ de recepción de mi pago, equivalente a un recibo de pago electrónico.
       document.getElementById("error").style.display = "none";
       document.getElementById("resultado").style.display = "none";
     }
-    <footer style="margin-top:30px; text-align:center; font-size:12px; color:#555;">
-© 2026 Sistema de Consulta de Planillas  
-Propiedad Intelectual M.A. Lic. Brandon Lima
-</footer>
   </script>
 </body>
 </html>
