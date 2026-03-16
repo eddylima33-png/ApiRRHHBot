@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Consulta de Última Planilla</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f5f7;
+      margin: 0;
+      padding: 40px 20px;
+      color: #1f2937;
+    }
+    .contenedor {
+      max-width: 640px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      padding: 28px;
+    }
+    h1 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    p {
+      margin-top: 0;
+      color: #4b5563;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 8px;
+      margin-top: 18px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 18px;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #0d6efd;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0b5ed7;
+    }
+    .mensaje,
+    .error,
+    .resultado {
+      margin-top: 18px;
+      border-radius: 10px;
+      padding: 16px;
+      display: none;
+    }
+    .mensaje {
+      background: #eef6ff;
+      color: #1d4ed8;
+    }
+    .error {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+    .resultado {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+    }
+    .fila {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 8px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .fila:last-child {
+      border-bottom: none;
+    }
+    .titulo {
+      font-weight: bold;
+      color: #374151;
+    }
+    .valor {
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <div class="contenedor">
+    <h1>Consulta de Última Planilla</h1>
+    <p>Ingrese su DPI para consultar la última planilla registrada.</p>
+
+    <label for="dpi">DPI</label>
+    <input type="text" id="dpi" placeholder="Ejemplo: 1000000000003" />
+
+    <button id="btnConsultar">Consultar planilla</button>
+
+    <div id="mensaje" class="mensaje"></div>
+    <div id="error" class="error"></div>
+
+    <div id="resultado" class="resultado">
+      <div class="fila">
+        <span class="titulo">Código de empleado</span>
+        <span class="valor" id="codigoEmpleado"></span>
+      </div>
+      <div class="fila">
+        <span class="titulo">DPI</span>
+        <span class="valor" id="dpiResultado"></span>
+      </div>
+      <div class="fila">
+        <span class="titulo">Periodo inicio</span>
+        <span class="valor" id="periodoInicio"></span>
+      </div>
+      <div class="fila">
+        <span class="titulo">Periodo fin</span>
+        <span class="valor" id="periodoFin"></span>
+      </div>
+      <div class="fila">
+        <span class="titulo">Sueldo base</span>
+        <span class="valor" id="sueldoBase"></span>
+      </div>
+      <div class="fila">
+        <span class="titulo">Total ingresos</span>
+        <span class="valor" id="totalIngresos"></span>
+      </div>
+      <div class="fila">
+        <span class="titulo">Total descuentos</span>
+        <span class="valor" id="totalDescuentos"></span>
+      </div>
+      <div class="fila">
+        <span class="titulo">Líquido a recibir</span>
+        <span class="valor" id="liquidoRecibir"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "https://apirrhhbot.onrender.com";
+    const btnConsultar = document.getElementById("btnConsultar");
+
+    btnConsultar.addEventListener("click", consultarPlanilla);
+
+    async function consultarPlanilla() {
+      const dpi = document.getElementById("dpi").value.trim();
+
+      ocultarTodo();
+
+      if (!dpi) {
+        mostrarError("Debe ingresar un DPI.");
+        return;
+      }
+
+      mostrarMensaje("Consultando información...");
+
+      try {
+        const url = `${API_BASE}/api/page/payroll/ultima-planilla/${encodeURIComponent(dpi)}`;
+        const response = await fetch(url, {
+          method: "GET",
+          headers: { "Accept": "application/json" }
+        });
+
+        ocultarTodo();
+
+        if (response.status === 404) {
+          mostrarError("No se encontró planilla para ese DPI.");
+          return;
+        }
+
+        if (!response.ok) {
+          const texto = await response.text();
+          mostrarError("Ocurrió un error al consultar la API.");
+          console.error(texto);
+          return;
+        }
+
+        const data = await response.json();
+        pintarResultado(data);
+
+      } catch (error) {
+        ocultarTodo();
+        mostrarError("No fue posible conectar con el servicio.");
+        console.error(error);
+      }
+    }
+
+    function pintarResultado(data) {
+      document.getElementById("codigoEmpleado").textContent = data.codigoEmpleado ?? "";
+      document.getElementById("dpiResultado").textContent = data.dpi ?? "";
+      document.getElementById("periodoInicio").textContent = formatearFecha(data.periodoInicio);
+      document.getElementById("periodoFin").textContent = formatearFecha(data.periodoFin);
+      document.getElementById("sueldoBase").textContent = formatearMoneda(data.sueldoBase);
+      document.getElementById("totalIngresos").textContent = formatearMoneda(data.totalIngresos);
+      document.getElementById("totalDescuentos").textContent = formatearMoneda(data.totalDescuentos);
+      document.getElementById("liquidoRecibir").textContent = formatearMoneda(data.liquidoRecibir);
+
+      document.getElementById("resultado").style.display = "block";
+    }
+
+    function formatearFecha(valor) {
+      if (!valor) return "";
+      const fecha = new Date(valor);
+      if (isNaN(fecha)) return valor;
+      return fecha.toLocaleDateString("es-GT");
+    }
+
+    function formatearMoneda(valor) {
+      const numero = Number(valor ?? 0);
+      return "Q " + numero.toFixed(2);
+    }
+
+    function mostrarMensaje(texto) {
+      const el = document.getElementById("mensaje");
+      el.textContent = texto;
+      el.style.display = "block";
+    }
+
+    function mostrarError(texto) {
+      const el = document.getElementById("error");
+      el.textContent = texto;
+      el.style.display = "block";
+    }
+
+    function ocultarTodo() {
+      document.getElementById("mensaje").style.display = "none";
+      document.getElementById("error").style.display = "none";
+      document.getElementById("resultado").style.display = "none";
+    }
+  </script>
+</body>
+</html>
