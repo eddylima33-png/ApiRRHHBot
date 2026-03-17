@@ -16,7 +16,7 @@
     }
 
     .contenedor {
-      max-width: 640px;
+      max-width: 700px;
       margin: 0 auto;
       background: #ffffff;
       border-radius: 14px;
@@ -160,7 +160,7 @@
 <body>
   <div class="contenedor">
     <div class="logo">
-      <img src="ApiRRHH/Images/LogoNova.png" alt="Logo empresa">
+      <img src="images/LogoNova.png" alt="Logo empresa">
     </div>
 
     <h1>Consulta de Última Planilla</h1>
@@ -219,8 +219,8 @@
         <span class="valor" id="bonificacionDecreto"></span>
       </div>
       <div class="fila">
-        <span class="titulo">Bonificación decreto</span>
-        <span class="valor" id="bonificacionDecreto"></span>
+        <span class="titulo">Sueldo extraordinario</span>
+        <span class="valor" id="sueldoExtraordinario"></span>
       </div>
       <div class="fila">
         <span class="titulo">Total ingresos</span>
@@ -310,10 +310,8 @@
       document.getElementById("dpiResultado").textContent = data.dpi ?? "";
       document.getElementById("periodoInicio").textContent = formatearFecha(data.periodoInicio);
       document.getElementById("periodoFin").textContent = formatearFecha(data.periodoFin);
-    
       document.getElementById("diasTrabajados").textContent = formatearNumero(data.diasTrabajados);
       document.getElementById("horasExtras").textContent = formatearNumero(data.horasExtras);
-    
       document.getElementById("sueldoBase").textContent = formatearMoneda(data.sueldoBase);
       document.getElementById("bonificacionDecreto").textContent = formatearMoneda(data.bonificacionDecreto);
       document.getElementById("sueldoExtraordinario").textContent = formatearMoneda(data.sueldoExtraordinario);
@@ -322,7 +320,7 @@
       document.getElementById("otrosDescuentos").textContent = formatearMoneda(data.otrosDescuentos);
       document.getElementById("totalDescuentos").textContent = formatearMoneda(data.totalDescuentos);
       document.getElementById("liquidoRecibir").textContent = formatearMoneda(data.liquidoRecibir);
-    
+
       document.getElementById("resultado").style.display = "block";
     }
 
@@ -333,14 +331,14 @@
       return fecha.toLocaleDateString("es-GT");
     }
 
-    function formatearNumero(valor) {
-      const numero = Number(valor ?? 0);
-      return numero.toFixed(2);
-    }
-
     function formatearMoneda(valor) {
       const numero = Number(valor ?? 0);
       return "Q " + numero.toFixed(2);
+    }
+
+    function formatearNumero(valor) {
+      const numero = Number(valor ?? 0);
+      return numero.toFixed(2);
     }
 
     function mostrarMensaje(texto) {
@@ -363,4 +361,3 @@
   </script>
 </body>
 </html>
-BLIMA
