@@ -203,12 +203,36 @@
         <span class="valor" id="periodoFin"></span>
       </div>
       <div class="fila">
+        <span class="titulo">Días trabajados</span>
+        <span class="valor" id="diasTrabajados"></span>
+      </div>
+      <div class="fila">
+        <span class="titulo">Horas extras</span>
+        <span class="valor" id="horasExtras"></span>
+      </div>
+      <div class="fila">
         <span class="titulo">Sueldo base</span>
         <span class="valor" id="sueldoBase"></span>
       </div>
       <div class="fila">
+        <span class="titulo">Bonificación decreto</span>
+        <span class="valor" id="bonificacionDecreto"></span>
+      </div>
+      <div class="fila">
+        <span class="titulo">Bonificación decreto</span>
+        <span class="valor" id="bonificacionDecreto"></span>
+      </div>
+      <div class="fila">
         <span class="titulo">Total ingresos</span>
         <span class="valor" id="totalIngresos"></span>
+      </div>
+      <div class="fila">
+        <span class="titulo">Cuota IGSS</span>
+        <span class="valor" id="cuotaIGSS"></span>
+      </div>
+      <div class="fila">
+        <span class="titulo">Otros descuentos</span>
+        <span class="valor" id="otrosDescuentos"></span>
       </div>
       <div class="fila">
         <span class="titulo">Total descuentos</span>
@@ -286,11 +310,19 @@
       document.getElementById("dpiResultado").textContent = data.dpi ?? "";
       document.getElementById("periodoInicio").textContent = formatearFecha(data.periodoInicio);
       document.getElementById("periodoFin").textContent = formatearFecha(data.periodoFin);
+    
+      document.getElementById("diasTrabajados").textContent = formatearNumero(data.diasTrabajados);
+      document.getElementById("horasExtras").textContent = formatearNumero(data.horasExtras);
+    
       document.getElementById("sueldoBase").textContent = formatearMoneda(data.sueldoBase);
+      document.getElementById("bonificacionDecreto").textContent = formatearMoneda(data.bonificacionDecreto);
+      document.getElementById("sueldoExtraordinario").textContent = formatearMoneda(data.sueldoExtraordinario);
       document.getElementById("totalIngresos").textContent = formatearMoneda(data.totalIngresos);
+      document.getElementById("cuotaIGSS").textContent = formatearMoneda(data.cuotaIGSS);
+      document.getElementById("otrosDescuentos").textContent = formatearMoneda(data.otrosDescuentos);
       document.getElementById("totalDescuentos").textContent = formatearMoneda(data.totalDescuentos);
       document.getElementById("liquidoRecibir").textContent = formatearMoneda(data.liquidoRecibir);
-
+    
       document.getElementById("resultado").style.display = "block";
     }
 
@@ -299,6 +331,11 @@
       const fecha = new Date(valor);
       if (isNaN(fecha)) return valor;
       return fecha.toLocaleDateString("es-GT");
+    }
+
+    function formatearNumero(valor) {
+      const numero = Number(valor ?? 0);
+      return numero.toFixed(2);
     }
 
     function formatearMoneda(valor) {
