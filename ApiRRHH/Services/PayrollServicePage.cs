@@ -16,8 +16,6 @@ namespace ApiRRHH.Services
         {
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
 
-
-
             const string sql = @"
                 SELECT TOP 1
                     E.CodigoEmpleado,
@@ -38,7 +36,7 @@ namespace ApiRRHH.Services
                 INNER JOIN Planillas P
                     ON E.IdEmpleado = P.IdEmpleado
                 WHERE E.DPI = @DPI
-                ORDER BY P.PeriodoFin DESC;";
+                ORDER BY P.PeriodoFin DESC, P.IdPlanilla DESC;";
 
             await using var connection = new SqlConnection(connectionString);
             await connection.OpenAsync();

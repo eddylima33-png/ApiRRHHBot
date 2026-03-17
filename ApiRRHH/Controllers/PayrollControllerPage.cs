@@ -17,15 +17,26 @@ namespace ApiRRHH.Controllers
         [HttpGet("ultima-planilla/{dpi}")]
         public async Task<IActionResult> ObtenerUltimaPlanilla(string dpi)
         {
-            if (string.IsNullOrWhiteSpace(dpi))
-                return BadRequest(new { mensaje = "Debe ingresar un DPI." });
+            try
+            {
+                if (string.IsNullOrWhiteSpace(dpi))
+                    return BadRequest(new { mensaje = "Debe ingresar un DPI." });
 
-            var resultado = await _payrollService.ObtenerUltimaPlanillaPorDpiAsync(dpi);
+                var resultado = await _payrollService.ObtenerUltimaPlanillaPorDpiAsync(dpi);
 
-            if (resultado == null)
-                return NotFound(new { mensaje = "No se encontró planilla para ese DPI." });
+                if (resultado == null)
+                    return NotFound(new { mensaje = "No se encontró planilla para ese DPI." });
 
-            return Ok(resultado);
+                return Ok(resultado);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    mensaje = "Error interno al consultar la planilla.",
+                    detalle = ex.Message
+                });
+            }
         }
     }
 }
