@@ -1,15 +1,18 @@
 ﻿using ApiRRHH.Models;
 using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace ApiRRHH.Services
 {
     public class PayrollServicePage
     {
         private readonly IConfiguration _configuration;
+        private readonly BitacoraService _bitacoraService;
 
-        public PayrollServicePage(IConfiguration configuration)
+        public PayrollServicePage(IConfiguration configuration, BitacoraService bitacoraService)
         {
             _configuration = configuration;
+            _bitacoraService = bitacoraService;
         }
 
         public async Task<UltimaPlanillaResponse?> ObtenerUltimaPlanillaPorDpiAsync(string dpi)
@@ -18,6 +21,7 @@ namespace ApiRRHH.Services
 
             const string sql = @"
                 SELECT TOP 1
+                    E.IdEmpleado,
                     E.CodigoEmpleado,
                     E.DPI,
                     P.PeriodoInicio,
@@ -47,15 +51,24 @@ namespace ApiRRHH.Services
             await using var reader = await command.ExecuteReaderAsync();
 
             if (!await reader.ReadAsync())
-                return null;
+            {
+                await _bitacoraService.RegistrarBitacora(
+                    null,
+                    $"Consulta de última planilla por DPI: {dpi}",
+                    "No se encontraron registros"
+                );
 
-            return new UltimaPlanillaResponse
+                return null;
+            }
+
+            int idEmpleado = reader["IdEmpleado"] == DBNull.Value ? 0 : Convert.ToInt32(reader["IdEmpleado"]);
+
+            var response = new UltimaPlanillaResponse
             {
                 CodigoEmpleado = reader["CodigoEmpleado"]?.ToString() ?? "",
                 DPI = reader["DPI"]?.ToString() ?? "",
                 PeriodoInicio = reader["PeriodoInicio"] == DBNull.Value ? null : Convert.ToDateTime(reader["PeriodoInicio"]),
                 PeriodoFin = reader["PeriodoFin"] == DBNull.Value ? null : Convert.ToDateTime(reader["PeriodoFin"]),
-
                 DiasTrabajados = reader["DiasTrabajados"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["DiasTrabajados"]),
                 HorasExtras = reader["HorasExtras"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["HorasExtras"]),
                 SueldoBase = reader["SueldoBase"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["SueldoBase"]),
@@ -67,6 +80,14 @@ namespace ApiRRHH.Services
                 TotalDescuentos = reader["TotalDescuentos"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["TotalDescuentos"]),
                 LiquidoRecibir = reader["LiquidoRecibir"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["LiquidoRecibir"])
             };
+
+            await _bitacoraService.RegistrarBitacora(
+                idEmpleado,
+                $"Consulta de última planilla por DPI: {dpi}",
+                $"Consulta exitosa. Líquido a recibir: {response.LiquidoRecibir:N2}"
+            );
+
+            return response;
         }
     }
 }

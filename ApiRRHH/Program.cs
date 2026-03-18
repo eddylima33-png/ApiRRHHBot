@@ -13,6 +13,12 @@ builder.Services.AddScoped<WhatsappService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PayrollServicePage>();
 
+builder.Services.AddSingleton<BitacoraService>(sp =>
+    new BitacoraService(
+        sp.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection")!
+    )
+);
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("PermitirWeb", policy =>
