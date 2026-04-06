@@ -14,29 +14,45 @@ namespace ApiRRHH.Controllers
             _payrollService = payrollService;
         }
 
+        // =============================
+        // ✅ ÚLTIMA PLANILLA
+        // =============================
         [HttpGet("ultima-planilla/{dpi}")]
         public async Task<IActionResult> ObtenerUltimaPlanilla(string dpi)
         {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(dpi))
-                    return BadRequest(new { mensaje = "Debe ingresar un DPI." });
+            if (string.IsNullOrWhiteSpace(dpi))
+                return BadRequest(new { mensaje = "Debe ingresar un DPI." });
 
-                var resultado = await _payrollService.ObtenerUltimaPlanillaPorDpiAsync(dpi);
+            var resultado = await _payrollService.ObtenerUltimaPlanillaPorDpiAsync(dpi);
 
-                if (resultado == null)
-                    return NotFound(new { mensaje = "No se encontró planilla para ese DPI." });
+            if (resultado == null)
+                return NotFound(new { mensaje = "No se encontró planilla para ese DPI." });
 
-                return Ok(resultado);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    mensaje = "Error interno al consultar la planilla.",
-                    detalle = ex.Message
-                });
-            }
+            return Ok(resultado);
+        }
+
+        // =============================
+        // 🆕 LISTAR PERIODOS
+        // =============================
+        [HttpGet("periodos/{dpi}")]
+        public async Task<IActionResult> ObtenerPeriodos(string dpi)
+        {
+            var lista = await _payrollService.ObtenerPeriodosPorDpiAsync(dpi);
+            return Ok(lista);
+        }
+
+        // =============================
+        // 🆕 CONSULTAR POR PERIODO
+        // =============================
+        [HttpGet("por-periodo/{dpi}")]
+        public async Task<IActionResult> ObtenerPorPeriodo(string dpi, DateTime inicio, DateTime fin)
+        {
+            var resultado = await _payrollService.ObtenerPlanillaPorPeriodoAsync(dpi, inicio, fin);
+
+            if (resultado == null)
+                return NotFound(new { mensaje = "No se encontró la planilla para ese periodo." });
+
+            return Ok(resultado);
         }
     }
 }

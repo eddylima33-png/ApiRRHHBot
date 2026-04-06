@@ -15,6 +15,9 @@ namespace ApiRRHH.Services
             _bitacoraService = bitacoraService;
         }
 
+        // =============================
+        // ✅ ÚLTIMA PLANILLA (YA EXISTENTE)
+        // =============================
         public async Task<UltimaPlanillaResponse?> ObtenerUltimaPlanillaPorDpiAsync(string dpi)
         {
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
@@ -88,6 +91,130 @@ namespace ApiRRHH.Services
             );
 
             return response;
+        }
+
+        // =============================
+        // 🆕 LISTAR PERIODOS
+        // =============================
+        public async Task<List<PeriodoPlanillaResponse>> ObtenerPeriodosPorDpiAsync(string dpi)
+        {
+            var lista = new List<PeriodoPlanillaResponse>();
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            const string sql = @"
+                SELECT 
+                    P.PeriodoInicio,
+                    P.PeriodoFin
+                FROM Empleados E
+                INNER JOIN Planillas P ON E.IdEmpleado = P.IdEmpleado
+                WHERE E.DPI = @DPI
+                ORDER BY P.PeriodoFin DESC;";
+
+            await using var connection = new SqlConnection(connectionString);
+            await connection.OpenAsync();
+
+            await using var command = new SqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@DPI", dpi);
+
+            await using var reader = await command.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                DateTime? inicio = reader["PeriodoInicio"] == DBNull.Value
+                    ? (DateTime?)null
+                    : Convert.ToDateTime(reader["PeriodoInicio"]);
+
+                DateTime? fin = reader["PeriodoFin"] == DBNull.Value
+                    ? (DateTime?)null
+                    : Convert.ToDateTime(reader["PeriodoFin"]);
+
+                lista.Add(new PeriodoPlanillaResponse
+                {
+                    PeriodoInicio = inicio,
+                    PeriodoFin = fin,
+                    Descripcion = FormatearDescripcionPeriodo(inicio, fin)
+                });
+            }
+
+            return lista;
+        }
+
+        // =============================
+        // 🆕 CONSULTAR POR PERIODO
+        // =============================
+        public async Task<UltimaPlanillaResponse?> ObtenerPlanillaPorPeriodoAsync(string dpi, DateTime inicio, DateTime fin)
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            const string sql = @"
+                SELECT 
+                    E.IdEmpleado,
+                    E.CodigoEmpleado,
+                    E.DPI,
+                    P.PeriodoInicio,
+                    P.PeriodoFin,
+                    P.DiasTrabajados,
+                    P.HorasExtras,
+                    P.SueldoBase,
+                    P.BonificacionDecreto,
+                    P.SueldoExtraordinario,
+                    P.TotalIngresos,
+                    P.CuotaIGSS,
+                    P.OtrosDescuentos,
+                    P.TotalDescuentos,
+                    P.LiquidoRecibir
+                FROM Empleados E
+                INNER JOIN Planillas P ON E.IdEmpleado = P.IdEmpleado
+                WHERE E.DPI = @DPI
+                  AND P.PeriodoInicio = @Inicio
+                  AND P.PeriodoFin = @Fin;";
+
+            await using var connection = new SqlConnection(connectionString);
+            await connection.OpenAsync();
+
+            await using var command = new SqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@DPI", dpi);
+            command.Parameters.AddWithValue("@Inicio", inicio);
+            command.Parameters.AddWithValue("@Fin", fin);
+
+            await using var reader = await command.ExecuteReaderAsync();
+
+            if (!await reader.ReadAsync())
+                return null;
+
+            return new UltimaPlanillaResponse
+            {
+                CodigoEmpleado = reader["CodigoEmpleado"]?.ToString() ?? "",
+                DPI = reader["DPI"]?.ToString() ?? "",
+                PeriodoInicio = Convert.ToDateTime(reader["PeriodoInicio"]),
+                PeriodoFin = Convert.ToDateTime(reader["PeriodoFin"]),
+                DiasTrabajados = Convert.ToDecimal(reader["DiasTrabajados"]),
+                HorasExtras = Convert.ToDecimal(reader["HorasExtras"]),
+                SueldoBase = Convert.ToDecimal(reader["SueldoBase"]),
+                BonificacionDecreto = Convert.ToDecimal(reader["BonificacionDecreto"]),
+                SueldoExtraordinario = Convert.ToDecimal(reader["SueldoExtraordinario"]),
+                TotalIngresos = Convert.ToDecimal(reader["TotalIngresos"]),
+                CuotaIGSS = Convert.ToDecimal(reader["CuotaIGSS"]),
+                OtrosDescuentos = Convert.ToDecimal(reader["OtrosDescuentos"]),
+                TotalDescuentos = Convert.ToDecimal(reader["TotalDescuentos"]),
+                LiquidoRecibir = Convert.ToDecimal(reader["LiquidoRecibir"])
+            };
+        }
+
+        // =============================
+        // 🧠 FORMATEAR TEXTO
+        // =============================
+        private string FormatearDescripcionPeriodo(DateTime? inicio, DateTime? fin)
+        {
+            if (inicio == null || fin == null) return "";
+
+            var mes = inicio.Value.ToString("MMMM");
+            var anio = inicio.Value.Year;
+
+            if (inicio.Value.Day <= 15)
+                return $"Primera quincena de {mes} {anio}";
+            else
+                return $"Segunda quincena de {mes} {anio}";
         }
     }
 }
