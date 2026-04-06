@@ -16,7 +16,7 @@ namespace ApiRRHH.Services
         }
 
         // =============================
-        // ✅ ÚLTIMA PLANILLA (YA EXISTENTE)
+        // ✅ ÚLTIMA PLANILLA
         // =============================
         public async Task<UltimaPlanillaResponse?> ObtenerUltimaPlanillaPorDpiAsync(string dpi)
         {
@@ -34,6 +34,7 @@ namespace ApiRRHH.Services
                     P.SueldoBase,
                     P.BonificacionDecreto,
                     P.SueldoExtraordinario,
+                    P.Vacaciones,
                     P.TotalIngresos,
                     P.CuotaIGSS,
                     P.OtrosDescuentos,
@@ -70,13 +71,14 @@ namespace ApiRRHH.Services
             {
                 CodigoEmpleado = reader["CodigoEmpleado"]?.ToString() ?? "",
                 DPI = reader["DPI"]?.ToString() ?? "",
-                PeriodoInicio = reader["PeriodoInicio"] == DBNull.Value ? null : Convert.ToDateTime(reader["PeriodoInicio"]),
-                PeriodoFin = reader["PeriodoFin"] == DBNull.Value ? null : Convert.ToDateTime(reader["PeriodoFin"]),
+                PeriodoInicio = reader["PeriodoInicio"] == DBNull.Value ? Nothing : Convert.ToDateTime(reader["PeriodoInicio"]),
+                PeriodoFin = reader["PeriodoFin"] == DBNull.Value ? Nothing : Convert.ToDateTime(reader["PeriodoFin"]),
                 DiasTrabajados = reader["DiasTrabajados"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["DiasTrabajados"]),
                 HorasExtras = reader["HorasExtras"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["HorasExtras"]),
                 SueldoBase = reader["SueldoBase"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["SueldoBase"]),
                 BonificacionDecreto = reader["BonificacionDecreto"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["BonificacionDecreto"]),
                 SueldoExtraordinario = reader["SueldoExtraordinario"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["SueldoExtraordinario"]),
+                Vacaciones = reader["Vacaciones"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["Vacaciones"]),
                 TotalIngresos = reader["TotalIngresos"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["TotalIngresos"]),
                 CuotaIGSS = reader["CuotaIGSS"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["CuotaIGSS"]),
                 OtrosDescuentos = reader["OtrosDescuentos"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["OtrosDescuentos"]),
@@ -158,6 +160,7 @@ namespace ApiRRHH.Services
                     P.SueldoBase,
                     P.BonificacionDecreto,
                     P.SueldoExtraordinario,
+                    P.Vacaciones,
                     P.TotalIngresos,
                     P.CuotaIGSS,
                     P.OtrosDescuentos,
@@ -186,18 +189,19 @@ namespace ApiRRHH.Services
             {
                 CodigoEmpleado = reader["CodigoEmpleado"]?.ToString() ?? "",
                 DPI = reader["DPI"]?.ToString() ?? "",
-                PeriodoInicio = Convert.ToDateTime(reader["PeriodoInicio"]),
-                PeriodoFin = Convert.ToDateTime(reader["PeriodoFin"]),
-                DiasTrabajados = Convert.ToDecimal(reader["DiasTrabajados"]),
-                HorasExtras = Convert.ToDecimal(reader["HorasExtras"]),
-                SueldoBase = Convert.ToDecimal(reader["SueldoBase"]),
-                BonificacionDecreto = Convert.ToDecimal(reader["BonificacionDecreto"]),
-                SueldoExtraordinario = Convert.ToDecimal(reader["SueldoExtraordinario"]),
-                TotalIngresos = Convert.ToDecimal(reader["TotalIngresos"]),
-                CuotaIGSS = Convert.ToDecimal(reader["CuotaIGSS"]),
-                OtrosDescuentos = Convert.ToDecimal(reader["OtrosDescuentos"]),
-                TotalDescuentos = Convert.ToDecimal(reader["TotalDescuentos"]),
-                LiquidoRecibir = Convert.ToDecimal(reader["LiquidoRecibir"])
+                PeriodoInicio = reader["PeriodoInicio"] == DBNull.Value ? null : Convert.ToDateTime(reader["PeriodoInicio"]),
+                PeriodoFin = reader["PeriodoFin"] == DBNull.Value ? null : Convert.ToDateTime(reader["PeriodoFin"]),
+                DiasTrabajados = reader["DiasTrabajados"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["DiasTrabajados"]),
+                HorasExtras = reader["HorasExtras"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["HorasExtras"]),
+                SueldoBase = reader["SueldoBase"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["SueldoBase"]),
+                BonificacionDecreto = reader["BonificacionDecreto"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["BonificacionDecreto"]),
+                SueldoExtraordinario = reader["SueldoExtraordinario"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["SueldoExtraordinario"]),
+                Vacaciones = reader["Vacaciones"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["Vacaciones"]),
+                TotalIngresos = reader["TotalIngresos"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["TotalIngresos"]),
+                CuotaIGSS = reader["CuotaIGSS"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["CuotaIGSS"]),
+                OtrosDescuentos = reader["OtrosDescuentos"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["OtrosDescuentos"]),
+                TotalDescuentos = reader["TotalDescuentos"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["TotalDescuentos"]),
+                LiquidoRecibir = reader["LiquidoRecibir"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["LiquidoRecibir"])
             };
         }
 

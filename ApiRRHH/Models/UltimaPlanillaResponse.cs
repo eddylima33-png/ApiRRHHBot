@@ -12,6 +12,7 @@
         public decimal SueldoBase { get; set; }
         public decimal BonificacionDecreto { get; set; }
         public decimal SueldoExtraordinario { get; set; }
+        public decimal Vacaciones { get; set; }
         public decimal TotalIngresos { get; set; }
         public decimal CuotaIGSS { get; set; }
         public decimal OtrosDescuentos { get; set; }
