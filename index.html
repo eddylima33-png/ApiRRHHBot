@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Consulta de Última Planilla</title>
+  <title>Portal de Consulta de Planilla</title>
+
   <style>
     * { box-sizing: border-box; }
 
@@ -16,7 +17,7 @@
     }
 
     .contenedor {
-      max-width: 700px;
+      max-width: 760px;
       margin: 0 auto;
       background: #ffffff;
       border-radius: 14px;
@@ -54,37 +55,12 @@
       margin-top: 18px;
     }
 
-    input[type="text"] {
+    input, select {
       width: 100%;
       padding: 12px;
       border: 1px solid #d1d5db;
       border-radius: 8px;
       font-size: 16px;
-    }
-
-    .check-contenedor {
-      margin-top: 16px;
-      padding: 12px;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      font-size: 14px;
-      color: #374151;
-      line-height: 1.5;
-    }
-
-    .check-contenedor label {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      margin: 0;
-      font-weight: normal;
-    }
-
-    .check-contenedor input[type="checkbox"] {
-      margin-top: 3px;
-      width: auto;
-      flex-shrink: 0;
     }
 
     button {
@@ -103,9 +79,7 @@
       background: #0b5ed7;
     }
 
-    .mensaje,
-    .error,
-    .resultado {
+    .mensaje, .error, .resultado, .panel {
       margin-top: 18px;
       border-radius: 10px;
       padding: 16px;
@@ -120,6 +94,11 @@
     .error {
       background: #fef2f2;
       color: #b91c1c;
+    }
+
+    .panel {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
     }
 
     .resultado {
@@ -148,6 +127,16 @@
       text-align: right;
     }
 
+    .bienvenida {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 16px;
+      display: none;
+    }
+
     footer {
       margin-top: 30px;
       text-align: center;
@@ -163,24 +152,55 @@
       <img src="ApiRRHH/Images/LogoNova.png" alt="Logo empresa">
     </div>
 
-    <h1>Consulta de Última Planilla</h1>
-    <p>Ingrese su DPI para consultar la última planilla registrada.</p>
+    <h1>Portal de Consulta de Planillas</h1>
+    <p>Ingrese su DPI para validar su acceso al portal.</p>
 
-    <label for="dpi">DPI</label>
-    <input type="text" id="dpi" placeholder="Ejemplo: 1000000000003" />
+    <!-- PANEL INICIAL -->
+    <div id="panelInicial" class="panel" style="display:block;">
+      <label for="dpi">DPI</label>
+      <input type="text" id="dpi" placeholder="Ejemplo: 1234567890101" />
 
-    <div class="check-contenedor">
-      <label for="aceptoConsulta">
-        <input type="checkbox" id="aceptoConsulta" />
-        <span>
-          Confirmo que estoy de acuerdo con consultar los datos de mi última planilla pagada.
-          Entiendo que esta consulta quedará registrada en el sistema como constancia digital
-          de recepción de mi pago, equivalente a un recibo de pago electrónico.
-        </span>
-      </label>
+      <button id="btnValidarDpi">Continuar</button>
     </div>
 
-    <button id="btnConsultar">Consultar planilla</button>
+    <!-- PANEL CREAR PIN -->
+    <div id="panelCrearPin" class="panel">
+      <label for="dpiCrear">DPI</label>
+      <input type="text" id="dpiCrear" readonly />
+
+      <label for="pinNuevo">Crear PIN de 4 dígitos</label>
+      <input type="password" id="pinNuevo" maxlength="4" placeholder="Ingrese su PIN" />
+
+      <label for="pinConfirmar">Confirmar PIN</label>
+      <input type="password" id="pinConfirmar" maxlength="4" placeholder="Confirme su PIN" />
+
+      <button id="btnCrearPin">Registrar PIN</button>
+      <button id="btnVolverInicio1" type="button">Volver</button>
+    </div>
+
+    <!-- PANEL LOGIN -->
+    <div id="panelLogin" class="panel">
+      <label for="dpiLogin">DPI</label>
+      <input type="text" id="dpiLogin" readonly />
+
+      <label for="pinLogin">PIN</label>
+      <input type="password" id="pinLogin" maxlength="4" placeholder="Ingrese su PIN" />
+
+      <button id="btnLogin">Ingresar</button>
+      <button id="btnVolverInicio2" type="button">Volver</button>
+    </div>
+
+    <!-- PANEL CONSULTA -->
+    <div id="panelConsulta" class="panel">
+      <div id="bienvenida" class="bienvenida"></div>
+
+      <label for="periodos">Seleccionar periodo</label>
+      <select id="periodos">
+        <option value="">Última planilla</option>
+      </select>
+
+      <button id="btnCerrarSesion" type="button">Cerrar sesión</button>
+    </div>
 
     <div id="mensaje" class="mensaje"></div>
     <div id="error" class="error"></div>
@@ -252,46 +272,266 @@
 
   <script>
     const API_BASE = "https://apirrhhbot.onrender.com";
-    const btnConsultar = document.getElementById("btnConsultar");
 
-    btnConsultar.addEventListener("click", consultarPlanilla);
+    let listaPeriodos = [];
+    let dpiActual = "";
+    let codigoEmpleadoActual = "";
 
-    async function consultarPlanilla() {
+    const panelInicial = document.getElementById("panelInicial");
+    const panelCrearPin = document.getElementById("panelCrearPin");
+    const panelLogin = document.getElementById("panelLogin");
+    const panelConsulta = document.getElementById("panelConsulta");
+    const resultado = document.getElementById("resultado");
+
+    document.getElementById("btnValidarDpi").addEventListener("click", validarDpi);
+    document.getElementById("btnCrearPin").addEventListener("click", registrarPin);
+    document.getElementById("btnLogin").addEventListener("click", loginPortal);
+    document.getElementById("btnVolverInicio1").addEventListener("click", volverInicio);
+    document.getElementById("btnVolverInicio2").addEventListener("click", volverInicio);
+    document.getElementById("btnCerrarSesion").addEventListener("click", cerrarSesion);
+    document.getElementById("periodos").addEventListener("change", cambiarPeriodo);
+
+    function ocultarPaneles() {
+      panelInicial.style.display = "none";
+      panelCrearPin.style.display = "none";
+      panelLogin.style.display = "none";
+      panelConsulta.style.display = "none";
+    }
+
+    function limpiarMensajes() {
+      document.getElementById("mensaje").style.display = "none";
+      document.getElementById("error").style.display = "none";
+    }
+
+    function mostrarMensaje(texto) {
+      const el = document.getElementById("mensaje");
+      el.textContent = texto;
+      el.style.display = "block";
+    }
+
+    function mostrarError(texto) {
+      const el = document.getElementById("error");
+      el.textContent = texto;
+      el.style.display = "block";
+    }
+
+    function volverInicio() {
+      limpiarMensajes();
+      ocultarPaneles();
+      resultado.style.display = "none";
+      panelInicial.style.display = "block";
+
+      document.getElementById("pinNuevo").value = "";
+      document.getElementById("pinConfirmar").value = "";
+      document.getElementById("pinLogin").value = "";
+    }
+
+    function cerrarSesion() {
+      dpiActual = "";
+      codigoEmpleadoActual = "";
+      listaPeriodos = [];
+      document.getElementById("dpi").value = "";
+      document.getElementById("dpiCrear").value = "";
+      document.getElementById("dpiLogin").value = "";
+      document.getElementById("periodos").innerHTML = '<option value="">Última planilla</option>';
+      document.getElementById("bienvenida").style.display = "none";
+      resultado.style.display = "none";
+      volverInicio();
+    }
+
+    async function validarDpi() {
       const dpi = document.getElementById("dpi").value.trim();
-      const check = document.getElementById("aceptoConsulta");
 
-      ocultarTodo();
+      limpiarMensajes();
+      resultado.style.display = "none";
 
       if (!dpi) {
         mostrarError("Debe ingresar un DPI.");
         return;
       }
 
-      if (!check.checked) {
-        mostrarError("Debe confirmar que está de acuerdo con consultar su planilla.");
-        return;
-      }
-
-      mostrarMensaje("Consultando información...");
+      mostrarMensaje("Validando DPI...");
 
       try {
-        const url = `${API_BASE}/api/page/payroll/ultima-planilla/${encodeURIComponent(dpi)}`;
-        const response = await fetch(url, {
-          method: "GET",
-          headers: { "Accept": "application/json" }
-        });
+        const response = await fetch(`${API_BASE}/api/portal/auth/estado/${encodeURIComponent(dpi)}`);
 
-        ocultarTodo();
+        limpiarMensajes();
 
         if (response.status === 404) {
-          mostrarError("No se encontró planilla para ese DPI.");
+          mostrarError("El DPI no existe en el sistema.");
           return;
         }
 
         if (!response.ok) {
-          const texto = await response.text();
-          mostrarError("Ocurrió un error al consultar la API.");
-          console.error(texto);
+          mostrarError("Ocurrió un error al validar el DPI.");
+          return;
+        }
+
+        const data = await response.json();
+        dpiActual = dpi;
+        codigoEmpleadoActual = data.codigoEmpleado || "";
+
+        ocultarPaneles();
+
+        if (data.tienePerfil) {
+          document.getElementById("dpiLogin").value = dpi;
+          panelLogin.style.display = "block";
+        } else {
+          document.getElementById("dpiCrear").value = dpi;
+          panelCrearPin.style.display = "block";
+        }
+
+      } catch (error) {
+        limpiarMensajes();
+        mostrarError("No fue posible conectar con el servicio.");
+        console.error(error);
+      }
+    }
+
+    async function registrarPin() {
+      const dpi = document.getElementById("dpiCrear").value.trim();
+      const pinNuevo = document.getElementById("pinNuevo").value.trim();
+      const pinConfirmar = document.getElementById("pinConfirmar").value.trim();
+
+      limpiarMensajes();
+
+      if (!pinNuevo || !pinConfirmar) {
+        mostrarError("Debe ingresar y confirmar su PIN.");
+        return;
+      }
+
+      if (!/^\d{4}$/.test(pinNuevo)) {
+        mostrarError("El PIN debe tener exactamente 4 dígitos.");
+        return;
+      }
+
+      if (pinNuevo !== pinConfirmar) {
+        mostrarError("Los PIN no coinciden.");
+        return;
+      }
+
+      mostrarMensaje("Registrando PIN...");
+
+      try {
+        const response = await fetch(`${API_BASE}/api/portal/auth/registrar-pin`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            dpi: dpi,
+            pin: pinNuevo
+          })
+        });
+
+        const data = await response.json();
+        limpiarMensajes();
+
+        if (!response.ok) {
+          mostrarError(data.mensaje || "No fue posible registrar el PIN.");
+          return;
+        }
+
+        mostrarMensaje("PIN registrado correctamente. Ahora puede iniciar sesión.");
+
+        document.getElementById("dpiLogin").value = dpi;
+        document.getElementById("pinNuevo").value = "";
+        document.getElementById("pinConfirmar").value = "";
+
+        ocultarPaneles();
+        panelLogin.style.display = "block";
+
+      } catch (error) {
+        limpiarMensajes();
+        mostrarError("No fue posible conectar con el servicio.");
+        console.error(error);
+      }
+    }
+
+    async function loginPortal() {
+      const dpi = document.getElementById("dpiLogin").value.trim();
+      const pin = document.getElementById("pinLogin").value.trim();
+
+      limpiarMensajes();
+
+      if (!dpi) {
+        mostrarError("Debe ingresar un DPI válido.");
+        return;
+      }
+
+      if (!pin) {
+        mostrarError("Debe ingresar su PIN.");
+        return;
+      }
+
+      mostrarMensaje("Validando acceso...");
+
+      try {
+        const response = await fetch(`${API_BASE}/api/portal/auth/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            dpi: dpi,
+            pin: pin
+          })
+        });
+
+        const data = await response.json();
+        limpiarMensajes();
+
+        if (!response.ok) {
+          mostrarError(data.mensaje || "No fue posible iniciar sesión.");
+          return;
+        }
+
+        dpiActual = dpi;
+        codigoEmpleadoActual = data.codigoEmpleado || "";
+
+        document.getElementById("pinLogin").value = "";
+
+        ocultarPaneles();
+        panelConsulta.style.display = "block";
+
+        const bienvenida = document.getElementById("bienvenida");
+        bienvenida.textContent = `Acceso correcto. Código de empleado: ${codigoEmpleadoActual}`;
+        bienvenida.style.display = "block";
+
+        await consultarUltimaPlanilla();
+        await cargarPeriodos();
+
+      } catch (error) {
+        limpiarMensajes();
+        mostrarError("No fue posible conectar con el servicio.");
+        console.error(error);
+      }
+    }
+
+    async function consultarUltimaPlanilla() {
+      if (!dpiActual) return;
+
+      mostrarMensaje("Consultando última planilla...");
+
+      try {
+        const response = await fetch(`${API_BASE}/api/page/payroll/ultima-planilla/${encodeURIComponent(dpiActual)}`, {
+          method: "GET",
+          headers: {
+            "Accept": "application/json"
+          }
+        });
+
+        limpiarMensajes();
+
+        if (response.status === 404) {
+          mostrarError("No se encontró planilla para este DPI.");
+          resultado.style.display = "none";
+          return;
+        }
+
+        if (!response.ok) {
+          mostrarError("Ocurrió un error al consultar la planilla.");
+          resultado.style.display = "none";
           return;
         }
 
@@ -299,8 +539,70 @@
         pintarResultado(data);
 
       } catch (error) {
-        ocultarTodo();
-        mostrarError("No fue posible conectar con el servicio.");
+        limpiarMensajes();
+        mostrarError("No fue posible consultar la planilla.");
+        console.error(error);
+      }
+    }
+
+    async function cargarPeriodos() {
+      if (!dpiActual) return;
+
+      try {
+        const response = await fetch(`${API_BASE}/api/page/payroll/periodos/${encodeURIComponent(dpiActual)}`);
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        listaPeriodos = data;
+
+        const select = document.getElementById("periodos");
+        select.innerHTML = '<option value="">Última planilla</option>';
+
+        data.forEach((p, index) => {
+          const option = document.createElement("option");
+          option.value = index;
+          option.textContent = p.descripcion;
+          select.appendChild(option);
+        });
+
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function cambiarPeriodo() {
+      const index = this.value;
+
+      limpiarMensajes();
+
+      if (!dpiActual) {
+        mostrarError("No hay sesión activa.");
+        return;
+      }
+
+      if (index === "") {
+        await consultarUltimaPlanilla();
+        return;
+      }
+
+      const periodo = listaPeriodos[index];
+
+      try {
+        const url = `${API_BASE}/api/page/payroll/por-periodo/${encodeURIComponent(dpiActual)}?inicio=${encodeURIComponent(periodo.periodoInicio)}&fin=${encodeURIComponent(periodo.periodoFin)}`;
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          mostrarError("No se pudo cargar el periodo seleccionado.");
+          return;
+        }
+
+        const data = await response.json();
+        pintarResultado(data);
+
+      } catch (error) {
+        mostrarError("Ocurrió un error al consultar el periodo.");
         console.error(error);
       }
     }
@@ -321,7 +623,7 @@
       document.getElementById("totalDescuentos").textContent = formatearMoneda(data.totalDescuentos);
       document.getElementById("liquidoRecibir").textContent = formatearMoneda(data.liquidoRecibir);
 
-      document.getElementById("resultado").style.display = "block";
+      resultado.style.display = "block";
     }
 
     function formatearFecha(valor) {
@@ -339,24 +641,6 @@
     function formatearNumero(valor) {
       const numero = Number(valor ?? 0);
       return numero.toFixed(2);
-    }
-
-    function mostrarMensaje(texto) {
-      const el = document.getElementById("mensaje");
-      el.textContent = texto;
-      el.style.display = "block";
-    }
-
-    function mostrarError(texto) {
-      const el = document.getElementById("error");
-      el.textContent = texto;
-      el.style.display = "block";
-    }
-
-    function ocultarTodo() {
-      document.getElementById("mensaje").style.display = "none";
-      document.getElementById("error").style.display = "none";
-      document.getElementById("resultado").style.display = "none";
     }
   </script>
 </body>
