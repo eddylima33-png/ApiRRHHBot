@@ -71,8 +71,8 @@ namespace ApiRRHH.Services
             {
                 CodigoEmpleado = reader["CodigoEmpleado"]?.ToString() ?? "",
                 DPI = reader["DPI"]?.ToString() ?? "",
-                PeriodoInicio = reader["PeriodoInicio"] == DBNull.Value ? Nothing : Convert.ToDateTime(reader["PeriodoInicio"]),
-                PeriodoFin = reader["PeriodoFin"] == DBNull.Value ? Nothing : Convert.ToDateTime(reader["PeriodoFin"]),
+                PeriodoInicio = reader["PeriodoInicio"] == DBNull.Value ? null : Convert.ToDateTime(reader["PeriodoInicio"]),
+                PeriodoFin = reader["PeriodoFin"] == DBNull.Value ? null : Convert.ToDateTime(reader["PeriodoFin"]),
                 DiasTrabajados = reader["DiasTrabajados"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["DiasTrabajados"]),
                 HorasExtras = reader["HorasExtras"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["HorasExtras"]),
                 SueldoBase = reader["SueldoBase"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["SueldoBase"]),
