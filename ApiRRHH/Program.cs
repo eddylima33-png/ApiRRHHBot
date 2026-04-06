@@ -12,6 +12,7 @@ builder.Services.AddScoped<PayrollService>();
 builder.Services.AddScoped<WhatsappService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PayrollServicePage>();
+builder.Services.AddScoped<PortalAuthService>();
 
 builder.Services.AddSingleton<BitacoraService>(sp =>
     new BitacoraService(
