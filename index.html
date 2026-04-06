@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Portal de Consulta de Planilla</title>
+  <title>Portal de Consulta de Planillas</title>
 
   <style>
     * { box-sizing: border-box; }
@@ -79,6 +79,14 @@
       background: #0b5ed7;
     }
 
+    .btn-secundario {
+      background: #6b7280;
+    }
+
+    .btn-secundario:hover {
+      background: #4b5563;
+    }
+
     .mensaje, .error, .resultado, .panel {
       margin-top: 18px;
       border-radius: 10px;
@@ -144,6 +152,17 @@
       color: #555;
       line-height: 1.5;
     }
+
+    @media (max-width: 640px) {
+      .fila {
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .valor {
+        text-align: left;
+      }
+    }
   </style>
 </head>
 <body>
@@ -159,7 +178,6 @@
     <div id="panelInicial" class="panel" style="display:block;">
       <label for="dpi">DPI</label>
       <input type="text" id="dpi" placeholder="Ejemplo: 1234567890101" />
-
       <button id="btnValidarDpi">Continuar</button>
     </div>
 
@@ -175,7 +193,7 @@
       <input type="password" id="pinConfirmar" maxlength="4" placeholder="Confirme su PIN" />
 
       <button id="btnCrearPin">Registrar PIN</button>
-      <button id="btnVolverInicio1" type="button">Volver</button>
+      <button id="btnVolverInicio1" type="button" class="btn-secundario">Volver</button>
     </div>
 
     <!-- PANEL LOGIN -->
@@ -187,7 +205,7 @@
       <input type="password" id="pinLogin" maxlength="4" placeholder="Ingrese su PIN" />
 
       <button id="btnLogin">Ingresar</button>
-      <button id="btnVolverInicio2" type="button">Volver</button>
+      <button id="btnVolverInicio2" type="button" class="btn-secundario">Volver</button>
     </div>
 
     <!-- PANEL CONSULTA -->
@@ -199,7 +217,7 @@
         <option value="">Última planilla</option>
       </select>
 
-      <button id="btnCerrarSesion" type="button">Cerrar sesión</button>
+      <button id="btnCerrarSesion" type="button" class="btn-secundario">Cerrar sesión</button>
     </div>
 
     <div id="mensaje" class="mensaje"></div>
@@ -241,6 +259,10 @@
       <div class="fila">
         <span class="titulo">Sueldo extraordinario</span>
         <span class="valor" id="sueldoExtraordinario"></span>
+      </div>
+      <div class="fila">
+        <span class="titulo">Vacaciones</span>
+        <span class="valor" id="vacaciones"></span>
       </div>
       <div class="fila">
         <span class="titulo">Total ingresos</span>
@@ -330,12 +352,14 @@
       dpiActual = "";
       codigoEmpleadoActual = "";
       listaPeriodos = [];
+
       document.getElementById("dpi").value = "";
       document.getElementById("dpiCrear").value = "";
       document.getElementById("dpiLogin").value = "";
       document.getElementById("periodos").innerHTML = '<option value="">Última planilla</option>';
       document.getElementById("bienvenida").style.display = "none";
       resultado.style.display = "none";
+
       volverInicio();
     }
 
@@ -617,6 +641,7 @@
       document.getElementById("sueldoBase").textContent = formatearMoneda(data.sueldoBase);
       document.getElementById("bonificacionDecreto").textContent = formatearMoneda(data.bonificacionDecreto);
       document.getElementById("sueldoExtraordinario").textContent = formatearMoneda(data.sueldoExtraordinario);
+      document.getElementById("vacaciones").textContent = formatearMoneda(data.vacaciones);
       document.getElementById("totalIngresos").textContent = formatearMoneda(data.totalIngresos);
       document.getElementById("cuotaIGSS").textContent = formatearMoneda(data.cuotaIGSS);
       document.getElementById("otrosDescuentos").textContent = formatearMoneda(data.otrosDescuentos);
